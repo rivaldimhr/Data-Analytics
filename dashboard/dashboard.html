@@ -513,6 +513,69 @@
         </div>
     </section>
 
+    <!-- SECTION 6B: MODEL FORECASTING -->
+    <section class="py-16 md:py-24 space-y-12 fade-in-section">
+        <div>
+            <div class="chapter-label">06B — HASIL PEMODELAN</div>
+            <h2 class="text-3xl font-black text-slate-800">
+                Seberapa akurat model memprediksi tingkat hunian hotel?
+            </h2>
+            <div class="section-divider"></div>
+            <p class="text-slate-500 mt-4 max-w-2xl text-lg leading-relaxed">
+                Model forecasting dibangun untuk memprediksi Tingkat Penghunian Kamar (TPK) 
+                hotel di Jawa Barat berdasarkan pola historis bulanan. 
+                Garis hijau menunjukkan hasil prediksi pada periode test 
+                yang tidak pernah dilihat model sebelumnya.
+            </p>
+        </div>
+
+        <div class="glass-card p-8 rounded-2xl shadow-sm">
+            <div class="mb-4">
+                <h3 class="font-bold text-lg text-slate-800">
+                    TPK Aktual vs Prediksi Model (2019–2025)
+                </h3>
+                <p class="text-sm text-slate-500 mt-1">
+                    Area hijau muda = periode forecast (data test yang belum pernah dilihat model)
+                </p>
+            </div>
+            <div id="forecast-chart" style="height: 420px; width: 100%;"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-blue-50/50 rounded-2xl p-6 border border-blue-100">
+                <p class="text-xs font-black uppercase tracking-widest text-blue-400 mb-3">
+                    Metode
+                </p>
+                <p class="font-bold text-slate-800">Time Series Forecasting</p>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                    Model dilatih menggunakan data historis TPK bulanan 
+                    untuk mempelajari pola musiman dan tren jangka panjang.
+                </p>
+            </div>
+            <div class="bg-green-50/50 rounded-2xl p-6 border border-green-100">
+                <p class="text-xs font-black uppercase tracking-widest text-green-400 mb-3">
+                    Validasi
+                </p>
+                <p class="font-bold text-slate-800">Train / Test Split</p>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                    Data dibagi menjadi set pelatihan (train) dan 
+                    pengujian (test) untuk mengukur kemampuan 
+                    generalisasi model pada data baru.
+                </p>
+            </div>
+            <div class="bg-amber-50/50 rounded-2xl p-6 border border-amber-100">
+                <p class="text-xs font-black uppercase tracking-widest text-amber-400 mb-3">
+                    Keterbatasan
+                </p>
+                <p class="font-bold text-slate-800">Data 2022–2023 Tidak Lengkap</p>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                    Kualitas prediksi di periode 2022–2023 dipengaruhi 
+                    oleh kelengkapan data yang terbatas pada periode tersebut.
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- SECTION 5: EKSPLORASI MANDIRI -->
     <section class="py-16 md:py-24 space-y-12 fade-in-section">
         <div>
@@ -988,7 +1051,113 @@ const ChartRenderer = (() => {
             { responsive: true, displayModeBar: false });
     }
 
-    return { renderOverview, renderExplorer, renderComparison, renderDominasi, renderProfilWisatawan, renderHotelTrend, renderHotelSeasonal };
+    function renderForecast(chartData) {
+        const el = document.getElementById('forecast-chart');
+        if (!el) return;
+        if (!chartData || chartData.length === 0) {
+            el.innerHTML = '<p style="text-align:center;padding:60px;color:#94a3b8">Data prediksi tidak tersedia</p>';
+            return;
+        }
+
+        const labels = chartData.map(d => d.label);
+        const aktual = chartData.map(d => d.aktual);
+        const prediksi = chartData.map(d => d.prediksi);
+
+        // Pisahkan train dan test untuk prediksi
+        const prediksiTrain = chartData.map(d => d.split === 'train' ? d.prediksi : null);
+        const prediksiTest = chartData.map(d => d.split === 'test' ? d.prediksi : null);
+
+        // Cari index pertama data test untuk shading
+        const testStartIdx = chartData.findIndex(d => d.split === 'test');
+        const testStartLabel = testStartIdx >= 0 ? labels[testStartIdx] : null;
+
+        const traces = [
+            {
+                x: labels,
+                y: aktual,
+                name: 'TPK Aktual',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#006591', width: 3 },
+                marker: { size: 5 }
+            },
+            {
+                x: labels,
+                y: prediksiTrain,
+                name: 'Prediksi (Train)',
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#0EA5E9', width: 2, dash: 'dot' },
+                connectgaps: false
+            },
+            {
+                x: labels,
+                y: prediksiTest,
+                name: 'Prediksi (Test/Forecast)',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#10B981', width: 2.5, dash: 'dash' },
+                marker: { size: 5, symbol: 'diamond' },
+                connectgaps: false
+            }
+        ];
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Inter', size: 11 },
+            showlegend: true,
+            legend: { orientation: 'h', y: 1.15 },
+            margin: { t: 50, r: 20, b: 80, l: 70 },
+            xaxis: {
+                type: 'category',
+                gridcolor: '#f0f4f8',
+                zeroline: false,
+                tickangle: -45,
+                tickfont: { size: 9 },
+                title: { text: 'Periode', font: { size: 11 } }
+            },
+            yaxis: {
+                gridcolor: '#f0f4f8',
+                zeroline: false,
+                ticksuffix: '%',
+                range: [0, 80],
+                title: { text: 'Tingkat Hunian Kamar (%)', font: { size: 11 } }
+            },
+            shapes: testStartLabel ? [{
+                type: 'rect',
+                xref: 'paper',
+                yref: 'paper',
+                x0: testStartIdx / labels.length,
+                y0: 0,
+                x1: 1,
+                y1: 1,
+                fillcolor: 'rgba(16, 185, 129, 0.06)',
+                line: { width: 0 }
+            }] : [],
+            annotations: testStartLabel ? [{
+                x: labels[testStartIdx],
+                y: 0.95,
+                xref: 'x',
+                yref: 'paper',
+                text: '▶ Mulai Periode Forecast',
+                showarrow: true,
+                arrowhead: 2,
+                font: { color: '#10B981', size: 10 },
+                ax: 60,
+                ay: -20
+            }] : []
+        };
+
+        Plotly.newPlot('forecast-chart', traces, layout,
+            { responsive: true, displayModeBar: false });
+    }
+
+    return { 
+        renderOverview, renderExplorer, renderComparison, 
+        renderDominasi, renderProfilWisatawan, 
+        renderHotelTrend, renderHotelSeasonal, renderForecast 
+    };
 })();
 
 /* ============================================
@@ -1133,6 +1302,40 @@ const HotelModule = (() => {
     return { loadHotel, getYearlyByType, getMonthlyPattern, getRaw: () => hotelData };
 })();
 
+/* ============================================
+   MODULE 7: FORECASTING DATA
+============================================ */
+const ForecastModule = (() => {
+    let forecastData = [];
+
+    async function loadForecast() {
+        return new Promise((resolve) => {
+            Papa.parse('../data/preprocessed/hotel_tpk_predicted.csv', {
+                download: true, header: true, dynamicTyping: true,
+                complete: function(results) {
+                    forecastData = results.data.filter(d => d.tahun && d.bulan_num);
+                    resolve(forecastData);
+                },
+                error: () => resolve([])
+            });
+        });
+    }
+
+    function getChartData(data) {
+        // Buat label "YYYY-MM" untuk x-axis
+        const bulanNama = ['','Jan','Feb','Mar','Apr','Mei','Jun',
+                           'Jul','Ags','Sep','Okt','Nov','Des'];
+        return data.map(d => ({
+            label: `${d.tahun}-${bulanNama[d.bulan_num]}`,
+            aktual: d.tpk_aktual,
+            prediksi: d.tpk_prediksi,
+            split: d.split
+        }));
+    }
+
+    return { loadForecast, getChartData, getRaw: () => forecastData };
+})();
+
 function renderFunFacts() {
   const container = document.getElementById('fun-facts-container');
   if (!container) return;
@@ -1155,6 +1358,7 @@ const UIController = (() => {
     async function init() {
         const rawData = await DataLoader.load();
         const hotelData = await HotelModule.loadHotel();
+        const forecastData = await ForecastModule.loadForecast();
         
         // Populate dropdown
         const select = document.getElementById('region-select');
@@ -1179,6 +1383,10 @@ const UIController = (() => {
             if (hotelData.length > 0) {
                 ChartRenderer.renderHotelTrend(HotelModule.getYearlyByType(hotelData));
                 ChartRenderer.renderHotelSeasonal(HotelModule.getMonthlyPattern(hotelData));
+            }
+
+            if (forecastData.length > 0) {
+                ChartRenderer.renderForecast(ForecastModule.getChartData(forecastData));
             }
         }, 100);
 

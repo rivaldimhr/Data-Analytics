@@ -126,6 +126,8 @@ Model yang bagus harus mengalahkan tebakan yang tidak butuh model sama sekali. S
 \*Maret 2025 anjlok ke 24%, jauh di luar pola, jadi ditampilkan juga hasil tanpa bulan itu.
 
 - **Regresi menang**: meleset 20% lebih sedikit daripada tebakan terbaik ("bulan yang sama tahun lalu").
+![Perbandingan model](docs/model-compare.png)
+
 - **Holt-Winters kalah jauh.** Bukan karena metodenya buruk, tetapi karena data latihnya: TPK 2022–2023 di seri ini sebagian besar hasil interpolasi garis lurus (data asli 2022 kosong dan 2023 hanya 4 bulan). Model deret waktu murni belajar dari garis buatan itu lalu memperpanjang tren naik 2024. Ini bukti lain bahwa kualitas data menentukan hasil.
 
 ## Skor kualitas data pelaporan
@@ -145,16 +147,20 @@ Model yang bagus harus mengalahkan tebakan yang tidak butuh model sama sekali. S
 
 Dalam praktik skor tertinggi sekitar 67, karena data 2021 kosong untuk semua kawasan dan 2022 hanya memuat satu kawasan. Hasil lengkapnya bisa dicari dan diunduh (CSV) dari dashboard.
 
+![Bagian kualitas data](docs/kualitas-data.png)
+
 ## Peta
 
 Data asli tidak memuat koordinat. Lokasi **52 dari 71 kawasan aktif** (mewakili 91% pengunjung) diisi manual sebagai perkiraan tingkat kecamatan di `data/reference/koordinat_kawasan.csv`; kawasan yang lokasinya belum pasti tidak dipetakan. Warna titik menunjukkan kelompok K-Means, ukurannya menunjukkan rata-rata pengunjung.
+
+![Peta kelompok kawasan](docs/peta.png)
 
 ## Cara membaca dashboard
 
 Dashboard disusun sebagai cerita dari atas ke bawah:
 
 1. **Konteks dan kualitas data.** Buka panel kuning "Catatan Kualitas Data" untuk melihat tahun mana yang bermasalah.
-2. **Filter** (menempel di atas saat digulir). Pilih tipe pengelola, rentang tahun, dan sertakan atau tidak tahun 2020. Grafik dan angka di bagian 02–05 ikut berubah.
+2. **Filter** (menempel di atas saat digulir di layar lebar). Contoh: dengan filter tipe TN, grafik hanya menghitung 11 kawasan taman nasional. Pilih tipe pengelola, rentang tahun, dan sertakan atau tidak tahun 2020. Grafik dan angka di bagian 02–05 ikut berubah.
 3. **Tren keseluruhan.** Grafik kunjungan wisatawan nusantara (wisnus) dan mancanegara (wisman) per tahun.
 4. **Ketimpangan dan kawasan unggulan.** Angka 33,4%, 65,0%, dan 224 dihitung langsung dari data, bukan ditulis manual.
 5. **Peta kelompok kawasan.** Klik nama kelompok di legenda untuk menyembunyikan atau menampilkannya.
@@ -163,6 +169,8 @@ Dashboard disusun sebagai cerita dari atas ke bawah:
 8. **Eksplorasi mandiri.** Pilih kawasan mana pun untuk melihat datanya sendiri.
 9. **Kualitas data.** Skor per kawasan; bisa dicari, disaring (mis. hanya nama ganda), dan diunduh.
 10. **Penutup.** Hanya memakai tahun yang datanya bisa dipercaya, plus rekomendasi dan tombol unduh ringkasan PDF.
+
+![Filter tipe pengelola TN](docs/filter-tn.png)
 
 ## Alur pengerjaan (OSEMN)
 

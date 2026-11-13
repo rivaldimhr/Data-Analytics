@@ -677,7 +677,7 @@
             <div class="chapter-label">07B — KUALITAS DATA PELAPORAN</div>
             <h2 class="text-3xl font-black text-slate-800">Masalah terbesar data ini bukan pandemi, tetapi pelaporan.</h2>
             <div class="section-divider"></div>
-            <p class="text-slate-500 max-w-3xl">Setiap kawasan diberi skor 0–100: persentase tahun (2016–2022, tanpa 2020 yang disalin) yang mencatat pengunjung, dikurangi 10 bila namanya terindikasi tercatat ganda. Skor rendah tidak berarti kawasannya sepi; bisa jadi pengelolanya tidak melapor.</p>
+            <p class="text-slate-500 max-w-3xl">Setiap kawasan diberi skor 0–100: persentase dari 6 tahun (2016–2022, tanpa 2020 yang disalin) yang mencatat pengunjung, dikurangi 10 bila namanya terindikasi tercatat ganda. Dalam praktik skor tertinggi sekitar 67, karena data 2021 kosong untuk semua kawasan dan data 2022 hanya memuat satu kawasan. Skor rendah tidak berarti kawasannya sepi; bisa jadi pengelolanya tidak melapor.</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="dq-cards"></div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -955,7 +955,7 @@ const ChartRenderer = (() => {
             showlegend: true,
             legend: { orientation: 'v', x: 1, y: 0.5 },
             annotations: [{
-                text: (sorted.length ? (sorted[0][1] / (sorted.reduce((a,[,v]) => a + v, 0) || 1) * 100).toFixed(1) : '0') + '%<br><span style="font-size:11px">' + (sorted[0] ? sorted[0][0].replace(/^TWA |^TAHURA |^BALAI (BESAR )?/,'').split(' ')[0] : '') + '</span>',
+                text: (sorted.length ? (sorted[0][1] / (sorted.reduce((a,[,v]) => a + v, 0) || 1) * 100).toFixed(1) : '0') + '%<br><span style="font-size:11px">' + (sorted[0] ? (w => { w = w.charAt(0) + w.slice(1).toLowerCase(); return w.length > 10 ? w.slice(0, 9) + '.' : w; })(sorted[0][0].replace(/^(TWA|TAHURA|TN\.?|BALAI( BESAR)?( TN\.?)?)\s+/,'').replace(/^GN\.\s*/,'').split(' ')[0]) : '') + '</span>',
                 x: 0.5, y: 0.5, xref: 'paper', yref: 'paper',
                 showarrow: false,
                 font: { size: 16, color: '#0C4A6E', family: 'Inter' }

@@ -5,8 +5,9 @@ Temuan utama proyek: angka kunjungan lebih mencerminkan siapa yang rajin melapor
 Skrip ini membuat skor sederhana yang bisa dicek ulang per kawasan.
 
 Aturan skor (0–100):
-  - Tahun yang dinilai: 2016–2022, KECUALI 2020 (data 2020 identik dengan 2019, ditandai SUSPECT_COPY).
-  - kelengkapan = tahun dengan pengunjung > 0 / tahun yang dinilai saat kawasan sudah terdaftar.
+  - Tahun yang dinilai: 2016–2022, KECUALI 2020 (data 2020 identik dengan 2019, ditandai SUSPECT_COPY) = 6 tahun.
+  - kelengkapan = tahun dengan pengunjung > 0 / 6. Kawasan yang tidak tercantum di suatu tahun dihitung tidak melapor,
+    karena nama yang hilang dari daftar juga berarti tidak ada laporan.
   - skor = round(100 * kelengkapan), dikurangi 10 bila nama kawasan mirip kawasan lain (kemungkinan tercatat ganda).
   - Kategori: Baik (≥ 50), Sedang (25–49), Buruk (1–24), Tidak pernah melapor (tidak ada tahun dengan pengunjung).
 
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "data/clean/dishut_clean_v2.csv"
 OUT = ROOT / "outputs/model_results/data_quality.csv"
 EXCLUDED_YEAR = 2020
+YEARS = [y for y in range(2016, 2023) if y != EXCLUDED_YEAR]
 
 d = pd.read_csv(SRC)
 per_year = (d.groupby(["pengelola_kawasan", "tipe_pengelola", "tahun"], as_index=False)
@@ -47,9 +49,8 @@ dup_map = {n: g for g in dup_groups if len(g) > 1 for n in g}
 rows = []
 for (kawasan, tipe), g in per_year.groupby(["pengelola_kawasan", "tipe_pengelola"]):
     scored = g[g.tahun != EXCLUDED_YEAR]
-    years_listed = sorted(scored.tahun.tolist())
     years_visit = sorted(scored.loc[scored.total > 0, "tahun"].tolist())
-    completeness = len(years_visit) / len(years_listed) if years_listed else 0
+    completeness = len(years_visit) / len(YEARS)
     dup = [n for n in dup_map.get(kawasan, []) if n != kawasan]
     score = max(0, round(100 * completeness) - (10 if dup else 0))
     if not years_visit:
@@ -63,7 +64,7 @@ for (kawasan, tipe), g in per_year.groupby(["pengelola_kawasan", "tipe_pengelola
     rows.append({
         "kawasan": kawasan,
         "tipe_pengelola": tipe,
-        "tahun_dinilai": len(years_listed),
+        "tahun_tercantum": int(scored.tahun.nunique()),
         "tahun_ada_pengunjung": len(years_visit),
         "daftar_tahun_ada_pengunjung": " ".join(map(str, years_visit)),
         "total_pengunjung_2016_2022": int(g.total.sum() - g.loc[g.tahun == EXCLUDED_YEAR, "total"].sum()),

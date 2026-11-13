@@ -1,0 +1,36 @@
+name: Dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Susun situs
+        run: |
+          mkdir -p site/data site/check
+          sed -e 's#\.\./data/clean/#data/#' -e 's#\.\./data/processed/#data/#' -e 's#\.\./data/preprocessed/#data/#' dashboard/dashboard.html > site/index.html
+          cp data/clean/dishut_clean_v2.csv data/processed/hotel_clean.csv data/preprocessed/hotel_tpk_predicted.csv site/data/
+          touch site/.nojekyll
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Cek dashboard di browser
+        run: |
+          pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
+          (cd site && python -m http.server 8000 >/dev/null 2>&1 &)
+          sleep 2
+          python scripts/check_dashboard.py http://localhost:8000/ site/check | tee site/check/report.txt
+      - name: Deploy ke gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          force_orphan: true

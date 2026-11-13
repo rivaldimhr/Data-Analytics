@@ -6,6 +6,54 @@
 
 ![Dashboard](docs/hero.png)
 
+## Singkatnya
+
+Data kunjungan wisata alam Jawa Barat ternyata **lebih banyak bercerita tentang siapa yang rajin melapor daripada siapa yang berkunjung**. Proyek ini membersihkan data tersebut, menandai tahun-tahun yang tidak bisa dipercaya, lalu menjawab tiga pertanyaan:
+
+1. Kawasan mana yang benar-benar ramai, dan mana yang hanya terdaftar?
+2. Seberapa besar dampak COVID, baik ke wisata alam maupun ke hotel?
+3. Kawasan mana yang perlu dikembangkan dan mana yang perlu dievaluasi?
+
+## Diagram aktivitas: memakai dashboard
+
+```mermaid
+flowchart TB
+  S([Buka dashboard]) --> A[Baca pertanyaan pembuka]
+  A --> B[Konteks: 310 kawasan, 7 tahun]
+  B --> C{Ingin tahu kualitas data?}
+  C -- Ya --> C1[Buka panel 'Catatan Kualitas Data'] --> D
+  C -- Tidak --> D[Tren kunjungan per tahun]
+  D --> E[Ketimpangan & 10 kawasan teratas]
+  E --> F[Profil wisatawan: lokal vs mancanegara]
+  F --> G[Hotel: tren, pola musiman, hasil model]
+  G --> H{Ingin melihat kawasan tertentu?}
+  H -- Ya --> H1[Eksplorasi mandiri: cari / pilih kawasan] --> H2[Lihat grafik & ringkasan kawasan itu] --> H
+  H -- Tidak --> I[Penutup: data valid + rekomendasi]
+  I --> Z([Selesai])
+```
+
+## Diagram aktivitas: dari data mentah ke dashboard
+
+```mermaid
+flowchart TB
+  R1[(CSV kunjungan wisata alam<br>Dinas Kehutanan)] --> O[Ambil & cek kualitas awal]
+  R2[(CSV hunian hotel<br>BPS)] --> O
+  O --> Q{Data janggal?<br>kosong / duplikat / tahun disalin}
+  Q -- Ya --> F1[Tandai flag, jangan dibuang] --> S1
+  Q -- Tidak --> S1[Bersihkan & samakan format]
+  S1 --> S2[Gabungkan data wisata & hotel]
+  S2 --> X[Eksplorasi: tren, musim, dampak COVID]
+  X --> M1[K-Means: kelompokkan 71 kawasan]
+  X --> M2[Regresi: prediksi hunian hotel]
+  M1 --> V1{Silhouette cukup?}
+  V1 -- Tidak --> M1
+  V1 -- Ya --> I[Beri nama & profil tiap kelompok]
+  M2 --> V2[Uji pada 2025 yang belum pernah dilihat model]
+  I --> D[Dashboard]
+  V2 --> D
+  D --> CI[GitHub Actions: build + cek 9 grafik tampil] --> W([Online di GitHub Pages])
+```
+
 ## Temuan utama
 
 - **Ketimpangan ekstrem.** TWA Tangkubanparahu menyumbang **33,4%** seluruh kunjungan tercatat, dan 5 kawasan teratas menyumbang **75,6%**. Sebanyak **224 kawasan** tidak pernah mencatat satu pengunjung pun.

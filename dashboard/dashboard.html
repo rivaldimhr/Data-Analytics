@@ -924,7 +924,7 @@ const ChartRenderer = (() => {
         };
 
         const traces = yearlyByType.map(item => ({
-            x: item.years.map(String),
+            x: item.years.map(Number),
             y: item.values,
             name: nameMap[item.tipe] || item.tipe,
             type: 'scatter',
@@ -940,7 +940,7 @@ const ChartRenderer = (() => {
 
         // Tambah trace benchmark: garis putus2 di y=38.5 (rata-rata keseluruhan)
         traces.push({
-            x: ['2019','2020','2021','2022','2023','2024','2025'],
+            x: [2019, 2020, 2021, 2022, 2023, 2024, 2025],
             y: [38.5, 38.5, 38.5, 38.5, 38.5, 38.5, 38.5],
             name: 'Rata-rata Keseluruhan (38.5%)',
             type: 'scatter',
@@ -952,23 +952,23 @@ const ChartRenderer = (() => {
             ...commonLayout,
             showlegend: true,
             legend: { orientation: 'h', y: 1.15 },
-            yaxis: { ...commonLayout.yaxis, ticksuffix: '%', range: [0, 75],
+            yaxis: { ...commonLayout.yaxis, ticksuffix: '%', range: [0, 75], autorange: false,
                      title: { text: 'Tingkat Hunian Kamar (%)', font: { size: 11 } } },
-            xaxis: { ...commonLayout.xaxis, type: 'category',
+            xaxis: { ...commonLayout.xaxis, type: 'linear', range: [2018.6, 2025.4], autorange: false, dtick: 1, tickformat: 'd',
                      title: { text: 'Tahun', font: { size: 11 } } },
             shapes: [{
                 type: 'rect', xref: 'x', yref: 'paper',
-                x0: 0.5, y0: 0, x1: 2.5, y1: 1,
+                x0: 2019.5, y0: 0, x1: 2021.5, y1: 1,
                 fillcolor: 'rgba(239,68,68,0.06)', line: { width: 0 }
             }],
             annotations: [
-                { x: '2020', y: 0.95, xref: 'x', yref: 'paper',
+                { x: 2020.5, y: 0.95, xref: 'x', yref: 'paper',
                   text: '📍 COVID-19 Impact', showarrow: false,
                   font: { color: '#ba1a1a', size: 10 } },
-                { x: '2022', y: 0.15, xref: 'x', yref: 'paper',
+                { x: 2022, y: 0.15, xref: 'x', yref: 'paper',
                   text: '⚠ Data 2022 tidak lengkap', showarrow: false,
                   font: { color: '#d97706', size: 9 } },
-                { x: '2023', y: 0.08, xref: 'x', yref: 'paper',
+                { x: 2023, y: 0.08, xref: 'x', yref: 'paper',
                   text: '⚠ Data 2023 tidak lengkap', showarrow: false,
                   font: { color: '#d97706', size: 9 } }
             ]

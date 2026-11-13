@@ -19,7 +19,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1500)
     pg.screenshot(path=f"{out}/full.png", full_page=True)
     charts = pg.evaluate("[...document.querySelectorAll('.js-plotly-plot')].length")
-    m = pg.new_page(viewport={"width": 390, "height": 844})
+    m = b.new_page(viewport={"width": 390, "height": 844})
     m.goto(url, wait_until="networkidle"); m.wait_for_timeout(3000)
     m.screenshot(path=f"{out}/mobile.png")
     b.close()

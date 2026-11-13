@@ -27,7 +27,7 @@ jobs:
           pip install -q playwright && python -m playwright install --with-deps chromium >/dev/null
           (cd site && python -m http.server 8000 >/dev/null 2>&1 &)
           sleep 2
-          python scripts/check_dashboard.py http://localhost:8000/ site/check | tee site/check/report.txt
+          python scripts/check_dashboard.py http://localhost:8000/ site/check > site/check/report.txt; cat site/check/report.txt
       - name: Deploy ke gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

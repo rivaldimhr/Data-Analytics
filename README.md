@@ -1,48 +1,112 @@
-# Analisis Strategis Pariwisata Jawa Barat (Kelompok 12)
+# Pariwisata Alam Jawa Barat: Analisis Data
 
-Proyek ini merupakan sistem analitik data komprehensif yang dirancang untuk menganalisis tren pariwisata di Jawa Barat, khususnya pada sektor Wisata Alam (ODTW) dan Tingkat Penghunian Kamar (TPK) Hotel. Menggunakan kerangka kerja OSEMN, proyek ini menghasilkan pengelompokkan kawasan wisata (Clustering) dan prediksi hunian hotel (Regression) untuk mendukung pengambilan keputusan berbasis data.
+**Siapa yang benar-benar mengunjungi hutan Jawa Barat?** Proyek ini menelusuri data kunjungan **310 kawasan wisata alam** (2016–2022) dan **tingkat hunian kamar (TPK) hotel** (2019–2025) di Jawa Barat. Hasilnya disajikan sebagai dashboard bercerita.
 
-## 📂 Struktur Folder
-Penyusunan folder mengikuti standar manajemen proyek data analitik agar setiap tahap dapat ditelusuri (*traceable*):
-- `data/raw/` : Koleksi dataset mentah asli (format .csv).
-- `data/processed/` : Data hasil tahap awal pembersihan.
-- `data/clean/` : Dataset final yang siap digunakan oleh model.
-- `notebooks/` : Pipeline utama pengerjaan (01 - 05).
-- `outputs/figures/` : Galeri visualisasi hasil analisis dan pemodelan.
-- `outputs/model_results/` : File CSV hasil output model (Clustering & Prediksi).
-- `dashboard/` : Antarmuka interaktif untuk penyajian wawasan.
-- `slides/` : Materi presentasi kelompok.
+**Dashboard:** https://rivaldimhr.github.io/jabar-tourism/ (bisa langsung dicoba, tanpa instalasi)
 
-## 🚀 Panduan Menjalankan Sistem
-Untuk mereproduksi hasil analisis, jalankan file di folder `notebooks/` secara berurutan sesuai penomoran berikut:
+![Dashboard](docs/hero.png)
 
-1.  **`01_obtain_data.py`**
-    Mengambil data mentah dari folder `raw`, melakukan pemeriksaan kualitas awal, dan memberikan flag pada data yang tidak konsisten.
-2.  **`02_scrub_final.ipynb`**
-    Melakukan pembersihan mendalam, menangani *missing values*, melakukan integrasi (*merging*) antar dataset, dan rekayasa fitur (*feature engineering*).
-3.  **`03_explore_viz.py`**
-    Menghasilkan visualisasi eksploratif untuk memahami tren historis dan dampak pandemi terhadap pariwisata.
-4.  **`04_model.ipynb`**
-    Tahap inti pemodelan menggunakan K-Means Clustering untuk segmentasi kawasan dan Linear Regression untuk prediksi TPK Hotel.
-5.  **`05_interpret.ipynb`**
-    Evaluasi performa model dan ekstraksi wawasan strategis sebagai dasar rekomendasi.
+## Temuan utama
 
-**Akses Dashboard:**
-Setelah seluruh pipeline dijalankan, hasil akhir dapat dilihat secara interaktif dengan membuka file `dashboard/dashboard.html` langsung melalui peramban web (*browser*).
+- **Ketimpangan ekstrem.** TWA Tangkubanparahu menyumbang **33,4%** seluruh kunjungan tercatat, dan 5 kawasan teratas menyumbang **75,6%**. Sebanyak **224 kawasan** tidak pernah mencatat satu pengunjung pun.
+- **Hampir semuanya wisatawan lokal.** Wisatawan mancanegara hanya **1,9%** dari total kunjungan.
+- **Masalah data lebih besar dari masalah pandemi.** Penurunan 98% dari 2016 ke 2017 terjadi karena banyak kawasan berhenti melapor, bukan karena pengunjungnya hilang. Data 2020 identik dengan 2019, sehingga diduga hasil salin. Pada 2022 hanya satu kawasan yang melapor.
+- **Hotel ikut terpukul saat COVID.** Rata-rata hunian hotel berbintang turun dari 53% (2019) ke 35% (2020). Bulan terpadat adalah **Desember**, yang tersepi **April–Mei**.
 
-## 🛠️ Dependensi (Requirements)
-Sistem ini dikembangkan menggunakan Python 3.x dengan beberapa pustaka utama:
-- `pandas` & `numpy` (Olah data)
-- `matplotlib` & `seaborn` (Visualisasi statis)
-- `plotly` (Visualisasi interaktif dashboard)
-- `scikit-learn` (Pemodelan Machine Learning)
+![Tren hunian hotel](docs/hotel-trend.png)
 
-## 👥 Kontribusi Tim
-- **Bastian Natanael Sibarani**: Integrasi sistem, logika dashboard, dan visualisasi data.
-- **Gabriel Marcellino**: Inisialisasi proyek, *data scrubbing*, dan eksplorasi data hotel.
-- **Faishal**: Narasi teknis, pengembangan model ML, dan visualisasi tren.
-- **Gymnastiar**: Pengolahan dataset *processed* dan analisis awal.
-- **Rivaldi**: Penyusunan materi presentasi dan asistensi desain dashboard.
+## Model
 
----
-*Proyek ini disusun sebagai Tugas Besar Mata Kuliah II4013 Data Analitik - Senin, 15 Juni 2026.*
+### 1. Pengelompokan kawasan (K-Means, k = 4)
+
+Model ini mengelompokkan 71 kawasan yang punya data kunjungan, berdasarkan rata-rata pengunjung per tahun, jumlah tahun aktif melapor, dan rasio wisatawan mancanegara.
+
+| Kelompok | Jumlah | Ciri | Contoh |
+|---|---|---|---|
+| Unggulan terkelola | 13 | ±50 rb pengunjung/tahun, rutin melapor | Tangkubanparahu, Tahura Djuanda |
+| Potensi tersembunyi | 8 | ±9 rb/tahun, jarang melapor | TN Gede Pangrango, Halimun-Salak |
+| Andalan lokal | 5 | ±3 rb/tahun, rutin melapor | Curug Cimahi, Citumang |
+| Perlu evaluasi | 45 | ±4 rb/tahun, hampir tidak pernah melapor | Curug Cisuren, Curug Cigentis |
+
+**Silhouette score: 0,67.** Kelompoknya cukup terpisah. k = 5 sedikit lebih tinggi (0,68), tetapi k = 4 dipilih karena tiap kelompoknya lebih mudah dijelaskan.
+
+### 2. Prediksi hunian hotel (regresi linear)
+
+Fitur yang dipakai: tren tahun, pola bulan (sin/cos), dan penanda masa COVID. Model dilatih pada data 2019–2024 (72 bulan) dan diuji pada 2025 (12 bulan) yang belum pernah dilihatnya.
+
+| Metrik (uji 2025) | Nilai |
+|---|---|
+| MAE | **3,3 poin persen** |
+| RMSE | 4,5 poin persen |
+| R² | 0,11 (latih: 0,51) |
+
+Artinya, prediksinya rata-rata meleset sekitar 3 poin dari hunian sebenarnya (misalnya memprediksi 38% saat aktualnya 41%). Model ini cukup baik menangkap tingkat rata-rata dan pola musim, tetapi lemah menebak naik-turun antarbulan, sehingga R² ujinya rendah. Model ini dipakai untuk **menjelaskan pola**, bukan untuk peramalan yang presisi. Dari koefisiennya:
+
+- Masa COVID menurunkan hunian sekitar 12,5 poin per bulan.
+- Desember–Januari lebih ramai dibanding bulan lain.
+
+![Prediksi vs aktual](docs/forecast.png)
+
+## Cara membaca dashboard
+
+Dashboard disusun sebagai cerita dari atas ke bawah:
+
+1. **Konteks dan kualitas data.** Buka panel kuning "Catatan Kualitas Data" untuk melihat tahun mana yang bermasalah.
+2. **Tren keseluruhan.** Grafik kunjungan wisatawan nusantara (wisnus) dan mancanegara (wisman) per tahun.
+3. **Ketimpangan dan kawasan unggulan.**
+4. **Profil wisatawan.**
+5. **Hotel.** Berisi tren hunian per tahun, pola musiman, dan hasil model. Pada grafik model, area hijau adalah tahun uji (2025).
+6. **Eksplorasi mandiri.** Pilih kawasan mana pun untuk melihat datanya sendiri.
+7. **Penutup.** Hanya memakai tahun yang datanya bisa dipercaya, plus rekomendasi.
+
+## Alur pengerjaan (OSEMN)
+
+```mermaid
+flowchart LR
+  A[Obtain<br>CSV Open Data Jabar & BPS] --> B[Scrub<br>bersihkan, tandai data janggal, gabungkan]
+  B --> C[Explore<br>tren, musim, dampak COVID]
+  C --> D[Model<br>K-Means + regresi]
+  D --> E[iNterpret<br>profil kelompok & rekomendasi]
+  E --> F[Dashboard]
+```
+
+| Langkah | File |
+|---|---|
+| Obtain | `notebooks/01_obtain_data.py` |
+| Scrub | `notebooks/02_scrub_final.ipynb` |
+| Explore | `notebooks/03_explore_viz.py` |
+| Model | `notebooks/04_model.ipynb` |
+| Interpret | `notebooks/05_interpret.ipynb` |
+
+Hasil tiap langkah disimpan di `data/` (raw → processed → clean), `outputs/figures/`, dan `outputs/model_results/`.
+
+### Menjalankan sendiri
+
+```bash
+pip install pandas numpy matplotlib seaborn plotly scikit-learn jupyter
+# jalankan notebook 01 → 05 berurutan, lalu:
+python -m http.server 8000      # dari folder repo
+# buka http://localhost:8000/dashboard/dashboard.html
+```
+
+Dashboard perlu dibuka lewat server lokal (bukan klik dua kali file HTML-nya) karena membaca file CSV.
+
+Situs online dibangun otomatis oleh `.github/workflows/pages.yml`. Workflow itu juga membuka dashboard di browser untuk memastikan semua grafik tampil tanpa error.
+
+## Keterbatasan
+
+- Data kunjungan bergantung pada laporan pengelola. Banyak kawasan tidak melapor, sehingga angka total lebih mencerminkan kepatuhan melapor daripada jumlah pengunjung sebenarnya.
+- Data TPK hotel 2022 hanya lengkap untuk hotel berbintang, dan 2023 hanya 4 bulan. Pada grafik model, bulan yang kosong tampil sebagai garis lurus hasil interpolasi.
+- Model regresi sederhana dengan R² uji rendah. Gunakan untuk memahami pola, bukan sebagai angka pasti.
+
+## Tim
+
+Tugas Besar **II4013 Data Analitik** ITB, Kelompok 12:
+
+- Bastian Natanael Sibarani: integrasi sistem, logika dashboard, visualisasi.
+- Gabriel Marcellino: inisialisasi proyek, *data scrubbing*, eksplorasi data hotel.
+- Faishal: narasi teknis, model ML, visualisasi tren.
+- Gymnastiar: data *processed* dan analisis awal.
+- Rivaldi: materi presentasi dan desain dashboard.
+
+Sumber data: Open Data Jawa Barat (Dinas Kehutanan) dan BPS Jawa Barat.

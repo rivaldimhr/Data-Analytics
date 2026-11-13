@@ -761,7 +761,7 @@ const DataProcessor = (() => {
 const ChartRenderer = (() => {
     const commonLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: { t: 40, r: 20, b: 60, l: 60 }, font: { family: 'Inter', size: 12 },
+        margin: { t: 40, r: 20, b: 60, l: 75 }, font: { family: 'Inter', size: 12 },
         xaxis: { gridcolor: '#f0f4f8', zeroline: false }, yaxis: { gridcolor: '#f0f4f8', zeroline: false, tickformat: ',' }
     };
     function renderOverview(data) {
@@ -823,7 +823,7 @@ const ChartRenderer = (() => {
         }, { displayModeBar: false, responsive: true });
         
         const trace2 = { x: yearly.map(d => d.tahun), y: yearly.map(d => d.total), type: 'bar', marker: { color: '#006591' } };
-        Plotly.newPlot('yearly-total-chart', [trace2], { ...commonLayout, margin: { t: 10, r: 10, b: 40, l: 60 }, xaxis: { type: 'category' } }, { displayModeBar: false });
+        Plotly.newPlot('yearly-total-chart', [trace2], { ...commonLayout, margin: { t: 10, r: 10, b: 40, l: 75 }, xaxis: { type: 'category' } }, { displayModeBar: false });
     }
 
     // Chart baru 1: Dominasi kawasan (pie/donut)
@@ -924,7 +924,7 @@ const ChartRenderer = (() => {
         };
 
         const traces = yearlyByType.map(item => ({
-            x: item.years,
+            x: item.years.map(String),
             y: item.values,
             name: nameMap[item.tipe] || item.tipe,
             type: 'scatter',
@@ -940,7 +940,7 @@ const ChartRenderer = (() => {
 
         // Tambah trace benchmark: garis putus2 di y=38.5 (rata-rata keseluruhan)
         traces.push({
-            x: [2019, 2020, 2021, 2022, 2023, 2024, 2025],
+            x: ['2019','2020','2021','2022','2023','2024','2025'],
             y: [38.5, 38.5, 38.5, 38.5, 38.5, 38.5, 38.5],
             name: 'Rata-rata Keseluruhan (38.5%)',
             type: 'scatter',
@@ -958,7 +958,7 @@ const ChartRenderer = (() => {
                      title: { text: 'Tahun', font: { size: 11 } } },
             shapes: [{
                 type: 'rect', xref: 'x', yref: 'paper',
-                x0: '2019.5', y0: 0, x1: '2021.5', y1: 1,
+                x0: 0.5, y0: 0, x1: 2.5, y1: 1,
                 fillcolor: 'rgba(239,68,68,0.06)', line: { width: 0 }
             }],
             annotations: [

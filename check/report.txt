@@ -1,0 +1,2 @@
+plotly charts rendered: 11
+no errors
